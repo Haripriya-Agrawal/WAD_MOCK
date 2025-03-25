@@ -1,0 +1,151 @@
+Let's build a **Product Catalog** where:  
+✅ **Node.js Server** serves product details from a JSON file  
+✅ **Frontend fetches data dynamically** & displays products  
+
+---
+
+## **Step 1: Set Up Node.js & Express Server**
+### **1.1 Create a New Project**
+```sh
+mkdir product-catalog
+cd product-catalog
+npm init -y
+```
+### **1.2 Install Dependencies**
+```sh
+npm install express cors fs
+```
+- `express` → To create an API  
+- `cors` → To allow frontend requests  
+- `fs` → To read `products.json`  
+
+---
+
+## **Step 2: Create a `products.json` File**
+Inside `product-catalog`, create `products.json`:  
+```json
+[
+  { "id": 1, "name": "Laptop", "price": 75000, "image": "laptop.jpg" },
+  { "id": 2, "name": "Smartphone", "price": 40000, "image": "smartphone.jpg" },
+  { "id": 3, "name": "Headphones", "price": 5000, "image": "headphones.jpg" }
+]
+```
+
+---
+
+## **Step 3: Create `server.js`**
+Now, create `server.js` inside `product-catalog`:
+```javascript
+const express = require('express');
+const cors = require('cors');
+const fs = require('fs');
+
+const app = express();
+const PORT = 3000;
+
+app.use(cors());
+app.use(express.static('public')); // Serve images from 'public' folder
+
+// Route to fetch product data
+app.get('/products', (req, res) => {
+  fs.readFile('products.json', 'utf8', (err, data) => {
+    if (err) {
+      res.status(500).send({ error: 'Error reading file' });
+    } else {
+      res.json(JSON.parse(data));
+    }
+  });
+});
+
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
+```
+- Reads `products.json` & sends data as **JSON API**  
+- Runs on **http://localhost:3000/products**  
+- Serves images from `public/` folder  
+
+---
+
+## **Step 4: Add Images in `public` Folder**
+Create a `public` folder inside `product-catalog`, and place the images:  
+- `laptop.jpg`  
+- `smartphone.jpg`  
+- `headphones.jpg`  
+
+---
+
+## **Step 5: Start the Server**
+Run:
+```sh
+node server.js
+```
+You'll see:
+```
+Server running on http://localhost:3000
+```
+Check **http://localhost:3000/products** → JSON should appear.
+
+---
+
+## **Step 6: Create a Frontend (`index.html`)**
+Now, create `index.html` in `product-catalog`:
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Catalog</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .container { display: flex; flex-wrap: wrap; justify-content: center; }
+        .product { border: 1px solid #ddd; padding: 15px; margin: 10px; width: 200px; border-radius: 5px; }
+        img { width: 100%; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h2>Product Catalog</h2>
+    <div class="container" id="productContainer"></div>
+
+    <script>
+        fetch('http://localhost:3000/products')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('productContainer');
+                data.forEach(product => {
+                    const div = document.createElement('div');
+                    div.classList.add('product');
+                    div.innerHTML = `
+                        <img src="http://localhost:3000/${product.image}" alt="${product.name}">
+                        <h3>${product.name}</h3>
+                        <p>Price: ₹${product.price}</p>
+                    `;
+                    container.appendChild(div);
+                });
+            })
+            .catch(error => console.error('Error fetching products:', error));
+    </script>
+</body>
+</html>
+```
+- Fetches **product data** from `http://localhost:3000/products`  
+- Displays **image, name, and price** dynamically  
+
+---
+
+## **Step 7: Open `index.html` in a Browser**
+1. **Start the server** (`node server.js`)  
+2. **Open `index.html` in a browser**  
+3. 🎉 **Product list appears dynamically!**  
+
+---
+
+## **🎯 Features Implemented**
+✅ **Node.js Express API**  
+✅ **Reads data from JSON file**  
+✅ **CORS enabled for frontend**  
+✅ **Displays product images dynamically**  
+
+Want to add a **database (MongoDB/MySQL)** or **search & filtering** next? 🚀
