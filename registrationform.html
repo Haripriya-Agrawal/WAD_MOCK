@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AJAX User Registration</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .feedback { font-size: 14px; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <h2>User Registration</h2>
+    <form id="registrationForm">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" onkeyup="checkAvailability('username')">
+        <div id="usernameFeedback" class="feedback"></div>
+        
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" onkeyup="checkAvailability('email')">
+        <div id="emailFeedback" class="feedback"></div>
+        
+        <button type="submit">Register</button>
+    </form>
+
+    <script>
+        function checkAvailability(type) {
+            let value = document.getElementById(type).value.trim();
+            let feedbackElement = document.getElementById(type + "Feedback");
+            
+            if (value === "") {
+                feedbackElement.innerHTML = "";
+                return;
+            }
+            
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", "check_availability.php", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    feedbackElement.innerHTML = xhr.responseText;
+                }
+            };
+            xhr.send(type + "=" + encodeURIComponent(value));
+        }
+    </script>
+</body>
+</html>
