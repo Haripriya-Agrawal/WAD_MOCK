@@ -1,0 +1,187 @@
+Let's build a **basic to-do list in Angular** with **add, edit, and delete** functionality using **two-way data binding**. I'll guide you step by step to set it up in **VS Code**.
+
+---
+
+## **Step 1: Install Node.js and Angular CLI**
+### **1.1 Install Node.js**
+Angular requires **Node.js** to run. Download and install it from:
+👉 [https://nodejs.org/](https://nodejs.org/)
+
+After installing, check the versions:
+```sh
+node -v
+npm -v
+```
+
+### **1.2 Install Angular CLI**
+Run this command in **VS Code terminal**:
+```sh
+npm install -g @angular/cli
+```
+Check the Angular CLI version:
+```sh
+ng version
+```
+
+---
+
+## **Step 2: Create an Angular Project**
+Open **VS Code** and run:
+```sh
+ng new todo-app
+```
+- Choose `Yes` for Angular routing (optional).
+- Select `CSS` for styling.
+
+Navigate into the project:
+```sh
+cd todo-app
+```
+Start the Angular development server:
+```sh
+ng serve
+```
+Now, open **http://localhost:4200/** in your browser. You should see the default Angular page.
+
+---
+
+## **Step 3: Create the To-Do Component**
+Generate a new component for the to-do list:
+```sh
+ng generate component todo
+```
+or
+```sh
+ng g c todo
+```
+This creates:
+```
+src/app/todo/
+  ├── todo.component.ts
+  ├── todo.component.html
+  ├── todo.component.css
+  └── todo.component.spec.ts
+```
+
+---
+
+## **Step 4: Add Two-Way Data Binding in `todo.component.ts`**
+Replace the contents of `todo.component.ts` with:
+
+```typescript
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-todo',
+  templateUrl: './todo.component.html',
+  styleUrls: ['./todo.component.css']
+})
+export class TodoComponent {
+  tasks: { text: string, isEditing: boolean }[] = [];
+  newTask: string = '';
+
+  addTask() {
+    if (this.newTask.trim()) {
+      this.tasks.push({ text: this.newTask, isEditing: false });
+      this.newTask = '';
+    }
+  }
+
+  editTask(index: number) {
+    this.tasks[index].isEditing = true;
+  }
+
+  saveTask(index: number) {
+    this.tasks[index].isEditing = false;
+  }
+
+  deleteTask(index: number) {
+    this.tasks.splice(index, 1);
+  }
+}
+```
+
+---
+
+## **Step 5: Create the To-Do List UI in `todo.component.html`**
+Replace `todo.component.html` with:
+
+```html
+<div>
+  <h2>To-Do List</h2>
+  
+  <input type="text" [(ngModel)]="newTask" placeholder="Enter task" />
+  <button (click)="addTask()">Add Task</button>
+
+  <ul>
+    <li *ngFor="let task of tasks; let i = index">
+      <span *ngIf="!task.isEditing">{{ task.text }}</span>
+      <input *ngIf="task.isEditing" [(ngModel)]="task.text" />
+      
+      <button *ngIf="!task.isEditing" (click)="editTask(i)">Edit</button>
+      <button *ngIf="task.isEditing" (click)="saveTask(i)">Save</button>
+      <button (click)="deleteTask(i)">Delete</button>
+    </li>
+  </ul>
+</div>
+```
+
+---
+
+## **Step 6: Enable `FormsModule` in `app.module.ts`**
+Open `src/app/app.module.ts` and **import FormsModule**:
+
+```typescript
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { AppComponent } from './app.component';
+import { TodoComponent } from './todo/todo.component';
+import { FormsModule } from '@angular/forms'; // Import FormsModule
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    TodoComponent
+  ],
+  imports: [
+    BrowserModule,
+    FormsModule  // Add FormsModule here
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+```
+
+---
+
+## **Step 7: Display the To-Do Component**
+Open `src/app/app.component.html` and replace its contents with:
+
+```html
+<app-todo></app-todo>
+```
+
+---
+
+## **Step 8: Run the Application**
+Go to VS Code terminal and start the Angular server:
+```sh
+ng serve
+```
+Now open **http://localhost:4200/** in your browser.
+
+🎉 **You now have a fully functional Angular To-Do List!** 🎉
+
+---
+
+## **Features Implemented:**
+✅ **Two-Way Data Binding** (with `[(ngModel)]`)  
+✅ **Dynamic Task Addition**  
+✅ **Edit & Save Task**  
+✅ **Delete Task**  
+✅ **Fully Responsive UI**
+
+---
+
+Let me know if you need any modifications or explanations! 🚀
