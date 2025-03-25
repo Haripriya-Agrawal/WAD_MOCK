@@ -1,0 +1,148 @@
+Let's build a **Node.js server** that:  
+✅ Reads user data from a JSON file  
+✅ Serves it as a REST API  
+✅ A **frontend page** fetches & displays user data dynamically  
+
+---
+
+## **Step 1: Set Up Node.js & Express Server**
+### **1.1 Initialize a new Node.js project**
+```sh
+mkdir user-api
+cd user-api
+npm init -y
+```
+### **1.2 Install Required Dependencies**
+```sh
+npm install express cors fs
+```
+- `express` → For building the API  
+- `cors` → To allow frontend requests  
+- `fs` → To read JSON files  
+
+---
+
+## **Step 2: Create a `users.json` File**
+Inside the `user-api` folder, create a `users.json` file:  
+```json
+[
+  { "id": 1, "name": "Alice", "email": "alice@example.com" },
+  { "id": 2, "name": "Bob", "email": "bob@example.com" },
+  { "id": 3, "name": "Charlie", "email": "charlie@example.com" }
+]
+```
+
+---
+
+## **Step 3: Create `server.js`**
+Now, create a `server.js` file inside `user-api`:
+```javascript
+const express = require('express');
+const cors = require('cors');
+const fs = require('fs');
+
+const app = express();
+const PORT = 3000;
+
+app.use(cors());
+
+// Route to fetch user data
+app.get('/users', (req, res) => {
+  fs.readFile('users.json', 'utf8', (err, data) => {
+    if (err) {
+      res.status(500).send({ error: 'Error reading file' });
+    } else {
+      res.json(JSON.parse(data));
+    }
+  });
+});
+
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
+```
+- Reads `users.json` and sends data as a response.  
+- Runs on **http://localhost:3000/users**  
+
+---
+
+## **Step 4: Start the Node.js Server**
+Run the server:
+```sh
+node server.js
+```
+You'll see:
+```
+Server running on http://localhost:3000
+```
+Open **http://localhost:3000/users** in your browser.  
+You'll see JSON data displayed.
+
+---
+
+## **Step 5: Create a Frontend (`index.html`)**
+Now, create `index.html` inside the **same folder**:
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background: #f4f4f4;
+            margin: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h2>User List</h2>
+    <ul id="userList"></ul>
+
+    <script>
+        fetch('http://localhost:3000/users')
+            .then(response => response.json())
+            .then(data => {
+                const userList = document.getElementById('userList');
+                data.forEach(user => {
+                    const li = document.createElement('li');
+                    li.textContent = `${user.name} - ${user.email}`;
+                    userList.appendChild(li);
+                });
+            })
+            .catch(error => console.error('Error fetching users:', error));
+    </script>
+</body>
+</html>
+```
+- Fetches user data from **http://localhost:3000/users**  
+- Displays it in a **list** dynamically  
+
+---
+
+## **Step 6: Open `index.html` in a Browser**
+1. **Start the server** (`node server.js`)  
+2. **Open `index.html` in a browser**  
+3. 🎉 **User data is displayed dynamically!**
+
+---
+
+## **🎯 Features Implemented**
+✅ **Node.js Express API**  
+✅ **Reads data from JSON file**  
+✅ **CORS enabled for frontend requests**  
+✅ **Frontend fetches and displays data dynamically**  
+
+Would you like to add **database integration** or **CRUD features** next? 🚀
