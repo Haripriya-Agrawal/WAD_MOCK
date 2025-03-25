@@ -1,0 +1,135 @@
+Creating a **Node.js application** to serve as a **static website** involves setting up an Express.js server to serve HTML, CSS, and JavaScript files. Below are the **step-by-step** instructions:
+
+---
+
+## **Step 1: Install Node.js and Initialize the Project**
+1. Install **Node.js** from [nodejs.org](https://nodejs.org/).
+2. Create a project folder and navigate to it using the terminal:
+   ```sh
+   mkdir my-static-website
+   cd my-static-website
+   ```
+3. Initialize a Node.js project:
+   ```sh
+   npm init -y
+   ```
+   This creates a `package.json` file.
+
+---
+
+## **Step 2: Install Express.js**
+Express.js is a lightweight framework for handling HTTP requests.
+
+```sh
+npm install express
+```
+
+---
+
+## **Step 3: Create the Project Structure**
+Inside `my-static-website`, create the following structure:
+
+```
+my-static-website
+│── public
+│   ├── index.html
+│   ├── about.html
+│   ├── styles.css
+│   ├── script.js
+│   ├── images/
+│── server.js
+│── package.json
+```
+
+- `public/` → Contains the static website files.
+- `server.js` → The main Node.js file.
+
+---
+
+## **Step 4: Create the Static Website (HTML, CSS, JS)**
+Inside the **`public/`** folder, create `index.html`:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Art Gallery</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Welcome to the Art Gallery</h1>
+    <p>Explore beautiful artwork from various artists.</p>
+    <script src="script.js"></script>
+</body>
+</html>
+```
+
+Create `styles.css`:
+
+```css
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f4f4f4;
+}
+h1 {
+    color: #333;
+}
+```
+
+Create `script.js`:
+
+```js
+console.log("Welcome to the Art Gallery!");
+```
+
+---
+
+## **Step 5: Create the Node.js Server**
+Inside **`server.js`**, add the following code:
+
+```js
+const express = require("express");
+const path = require("path");
+
+const app = express();
+const PORT = 3000;
+
+// Serve static files from the "public" directory
+app.use(express.static(path.join(__dirname, "public")));
+
+// Start the server
+app.listen(PORT, () => {
+    console.log(`Server is running at http://localhost:${PORT}`);
+});
+```
+
+---
+
+## **Step 6: Run the Application**
+1. Start the server:
+   ```sh
+   node server.js
+   ```
+2. Open a browser and visit:  
+   **`http://localhost:3000`**
+
+---
+
+## **Step 7: Deploy (Optional)**
+To deploy your static website:
+- **Use Vercel or Netlify** for free static site hosting.
+- **Use Render or Railway** for Node.js deployment.
+
+---
+
+### **✅ Summary**
+✔ Set up a Node.js project  
+✔ Installed Express.js  
+✔ Created a static website (HTML, CSS, JS)  
+✔ Served files using Express.js  
+✔ Ran the server and viewed the site in a browser  
+
+Would you like a specific **theme** or additional features like a **gallery with images**? 🚀
