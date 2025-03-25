@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AJAX To-Do List</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #todoList { margin-top: 20px; }
+        .task { padding: 10px; border: 1px solid #ddd; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <h2>To-Do List</h2>
+    <input type="text" id="taskInput" placeholder="Enter task">
+    <button onclick="addTask()">Add Task</button>
+    
+    <div id="todoList"></div>
+
+    <script>
+        function addTask() {
+            let taskInput = document.getElementById("taskInput");
+            let taskText = taskInput.value.trim();
+            if (taskText === "") return;
+            
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", "server.php", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    let taskDiv = document.createElement("div");
+                    taskDiv.classList.add("task");
+                    taskDiv.innerText = taskText;
+                    document.getElementById("todoList").appendChild(taskDiv);
+                    taskInput.value = "";
+                }
+            };
+            xhr.send("task=" + encodeURIComponent(taskText));
+        }
+    </script>
+</body>
+</html>
