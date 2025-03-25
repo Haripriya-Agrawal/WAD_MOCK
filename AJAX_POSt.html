@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration</title>
+</head>
+<body>
+    <h2>User Registration</h2>
+    <form id="registrationForm">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+        
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        
+        <button type="button" onclick="registerUser()">Register</button>
+    </form>
+    
+    <script>
+        function registerUser() {
+            let username = document.getElementById("username").value;
+            let email = document.getElementById("email").value;
+            let password = document.getElementById("password").value;
+            
+            let userData = { username, email, password };
+            
+            // Store in local storage
+            let users = JSON.parse(localStorage.getItem("users")) || [];
+            users.push(userData);
+            localStorage.setItem("users", JSON.stringify(users));
+            
+            // Send data via AJAX POST request
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", "save_user.php", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.send(JSON.stringify(userData));
+            
+            alert("User registered successfully!");
+            window.location.href = "user_list.html";
+        }
+    </script>
+</body>
+</html>
