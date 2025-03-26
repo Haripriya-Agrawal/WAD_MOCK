@@ -1,0 +1,440 @@
+# Music Database Management System using Node.js, Express.js, and MongoDB
+
+Here's a complete implementation for managing song details in a MongoDB database:
+
+## 1. Setup the project
+
+```bash
+mkdir music-database
+cd music-database
+npm init -y
+npm install express mongoose body-parser
+```
+
+## 2. Server Implementation (app.js)
+
+```javascript
+const express = require('express');
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+
+const app = express();
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Connect to MongoDB
+mongoose.connect('mongodb://localhost:27017/music', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
+.then(() => console.log('Connected to MongoDB'))
+.catch(err => console.error('Could not connect to MongoDB', err));
+
+// Define Song Schema
+const songSchema = new mongoose.Schema({
+    Songname: String,
+    Film: String,
+    Music_director: String,
+    singer: String,
+    Actor: String,
+    Actress: String
+});
+
+const Song = mongoose.model('songdetails', songSchema);
+
+// Routes
+
+// Home route - displays all songs in tabular format
+app.get('/', async (req, res) => {
+    try {
+        const songs = await Song.find();
+        let html = `
+            <h1>Song Details</h1>
+            <table border="1">
+                <tr>
+                    <th>Song Name</th>
+                    <th>Film</th>
+                    <th>Music Director</th>
+                    <th>Singer</th>
+                    <th>Actor</th>
+                    <th>Actress</th>
+                    <th>Actions</th>
+                </tr>
+        `;
+        
+        songs.forEach(song => {
+            html += `
+                <tr>
+                    <td>${song.Songname}</td>
+                    <td>${song.Film}</td>
+                    <td>${song.Music_director}</td>
+                    <td>${song.singer}</td>
+                    <td>${song.Actor || '-'}</td>
+                    <td>${song.Actress || '-'}</td>
+                    <td>
+                        <form action="/delete-song" method="POST" style="display:inline;">
+                            <input type="hidden" name="songId" value="${song._id}">
+                            <button type="submit">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        html += `</table>`;
+        
+        // Add links to other operations and forms
+        html += `
+            <h2>Other Operations</h2>
+            <ul>
+                <li><a href="/count">Get Total Song Count</a></li>
+                <li><a href="/add-sample-songs">Add Sample Songs</a></li>
+                <li><a href="/add-song-form">Add New Song</a></li>
+                <li><a href="/update-actor-form">Update Actor/Actress</a></li>
+            </ul>
+            
+            <h3>Search Operations</h3>
+            <form action="/music-director-songs" method="GET">
+                <label>List songs by Music Director:</label>
+                <input type="text" name="director" required>
+                <button type="submit">Search</button>
+            </form>
+            
+            <form action="/director-singer-songs" method="GET">
+                <label>List songs by Music Director and Singer:</label><br>
+                <input type="text" name="director" placeholder="Music Director" required>
+                <input type="text" name="singer" placeholder="Singer" required>
+                <button type="submit">Search</button>
+            </form>
+            
+            <form action="/singer-film-songs" method="GET">
+                <label>List songs by Singer and Film:</label><br>
+                <input type="text" name="singer" placeholder="Singer" required>
+                <input type="text" name="film" placeholder="Film" required>
+                <button type="submit">Search</button>
+            </form>
+        `;
+        
+        res.send(html);
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
+// Add sample songs
+app.get('/add-sample-songs', async (req, res) => {
+    try {
+        const sampleSongs = [
+            {
+                Songname: "Tum Hi Ho",
+                Film: "Aashiqui 2",
+                Music_director: "Mithoon",
+                singer: "Arijit Singh",
+                Actor: "Aditya Roy Kapur",
+                Actress: "Shraddha Kapoor"
+            },
+            {
+                Songname: "Channa Mereya",
+                Film: "Ae Dil Hai Mushkil",
+                Music_director: "Pritam",
+                singer: "Arijit Singh",
+                Actor: "Ranbir Kapoor",
+                Actress: "Anushka Sharma"
+            },
+            {
+                Songname: "Gerua",
+                Film: "Dilwale",
+                Music_director: "Pritam",
+                singer: "Arijit Singh",
+                Actor: "Shah Rukh Khan",
+                Actress: "Kajol"
+            },
+            {
+                Songname: "Kalank",
+                Film: "Kalank",
+                Music_director: "Pritam",
+                singer: "Arijit Singh",
+                Actor: "Varun Dhawan",
+                Actress: "Alia Bhatt"
+            },
+            {
+                Songname: "Raabta",
+                Film: "Agent Vinod",
+                Music_director: "Pritam",
+                singer: "Arijit Singh",
+                Actor: "Saif Ali Khan",
+                Actress: "Kareena Kapoor"
+            }
+        ];
+        
+        await Song.insertMany(sampleSongs);
+        res.redirect('/');
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
+// Get document count
+app.get('/count', async (req, res) => {
+    try {
+        const count = await Song.countDocuments();
+        res.send(`<h1>Total Songs: ${count}</h1><a href="/">Back to Home</a>`);
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
+// List songs by Music Director
+app.get('/music-director-songs', async (req, res) => {
+    try {
+        const director = req.query.director;
+        const songs = await Song.find({ Music_director: director });
+        
+        let html = `<h1>Songs by ${director}</h1><table border="1">
+            <tr>
+                <th>Song Name</th>
+                <th>Film</th>
+                <th>Singer</th>
+            </tr>`;
+        
+        songs.forEach(song => {
+            html += `
+                <tr>
+                    <td>${song.Songname}</td>
+                    <td>${song.Film}</td>
+                    <td>${song.singer}</td>
+                </tr>
+            `;
+        });
+        
+        html += `</table><a href="/">Back to Home</a>`;
+        res.send(html);
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
+// List songs by Music Director and Singer
+app.get('/director-singer-songs', async (req, res) => {
+    try {
+        const director = req.query.director;
+        const singer = req.query.singer;
+        const songs = await Song.find({ 
+            Music_director: director,
+            singer: singer
+        });
+        
+        let html = `<h1>Songs by ${director} sung by ${singer}</h1><table border="1">
+            <tr>
+                <th>Song Name</th>
+                <th>Film</th>
+            </tr>`;
+        
+        songs.forEach(song => {
+            html += `
+                <tr>
+                    <td>${song.Songname}</td>
+                    <td>${song.Film}</td>
+                </tr>
+            `;
+        });
+        
+        html += `</table><a href="/">Back to Home</a>`;
+        res.send(html);
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
+// Delete song
+app.post('/delete-song', async (req, res) => {
+    try {
+        const songId = req.body.songId;
+        await Song.findByIdAndDelete(songId);
+        res.redirect('/');
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
+// Form to add new song
+app.get('/add-song-form', (req, res) => {
+    res.send(`
+        <h1>Add New Song</h1>
+        <form action="/add-song" method="POST">
+            <label>Song Name:</label>
+            <input type="text" name="songname" required><br>
+            
+            <label>Film:</label>
+            <input type="text" name="film" required><br>
+            
+            <label>Music Director:</label>
+            <input type="text" name="director" required><br>
+            
+            <label>Singer:</label>
+            <input type="text" name="singer" required><br>
+            
+            <label>Actor (optional):</label>
+            <input type="text" name="actor"><br>
+            
+            <label>Actress (optional):</label>
+            <input type="text" name="actress"><br>
+            
+            <button type="submit">Add Song</button>
+        </form>
+        <a href="/">Back to Home</a>
+    `);
+});
+
+// Add new song
+app.post('/add-song', async (req, res) => {
+    try {
+        const newSong = new Song({
+            Songname: req.body.songname,
+            Film: req.body.film,
+            Music_director: req.body.director,
+            singer: req.body.singer,
+            Actor: req.body.actor,
+            Actress: req.body.actress
+        });
+        
+        await newSong.save();
+        res.redirect('/');
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
+// List songs by Singer and Film
+app.get('/singer-film-songs', async (req, res) => {
+    try {
+        const singer = req.query.singer;
+        const film = req.query.film;
+        const songs = await Song.find({ 
+            singer: singer,
+            Film: film
+        });
+        
+        let html = `<h1>Songs by ${singer} from ${film}</h1><table border="1">
+            <tr>
+                <th>Song Name</th>
+                <th>Music Director</th>
+            </tr>`;
+        
+        songs.forEach(song => {
+            html += `
+                <tr>
+                    <td>${song.Songname}</td>
+                    <td>${song.Music_director}</td>
+                </tr>
+            `;
+        });
+        
+        html += `</table><a href="/">Back to Home</a>`;
+        res.send(html);
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
+// Form to update actor and actress
+app.get('/update-actor-form', async (req, res) => {
+    try {
+        const songs = await Song.find();
+        
+        let html = `<h1>Update Actor/Actress</h1>
+        <form action="/update-actor" method="POST">
+            <label>Select Song:</label>
+            <select name="songId" required>`;
+        
+        songs.forEach(song => {
+            html += `<option value="${song._id}">${song.Songname} (${song.Film})</option>`;
+        });
+        
+        html += `</select><br>
+            <label>Actor:</label>
+            <input type="text" name="actor" required><br>
+            
+            <label>Actress:</label>
+            <input type="text" name="actress" required><br>
+            
+            <button type="submit">Update</button>
+        </form>
+        <a href="/">Back to Home</a>`;
+        
+        res.send(html);
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
+// Update actor and actress
+app.post('/update-actor', async (req, res) => {
+    try {
+        const songId = req.body.songId;
+        await Song.findByIdAndUpdate(songId, {
+            Actor: req.body.actor,
+            Actress: req.body.actress
+        });
+        res.redirect('/');
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
+// Start the server
+const port = process.env.PORT || 3000;
+app.listen(port, () => console.log(`Server running on port ${port}`));
+```
+
+## 3. How to Use the Application
+
+1. Start the MongoDB server (make sure MongoDB is installed and running)
+2. Run the Node.js application: `node app.js`
+3. Open a browser and navigate to `http://localhost:3000`
+
+## 4. Functionality Overview
+
+The application provides all the requested functionality:
+
+### a) Create Database called music
+- Automatically created when first document is inserted
+
+### b) Create collection called songdetails
+- Created through Mongoose model definition
+
+### c) Insert array of 5 song documents
+- Visit `/add-sample-songs` to insert sample data
+
+### d) Display total count and list all documents
+- Home page (`/`) shows all songs in tabular format
+- `/count` shows total song count
+
+### e) List specified Music Director songs
+- Use the "List songs by Music Director" form on home page
+
+### f) List specified Music Director songs sung by specified Singer
+- Use the "List songs by Music Director and Singer" form
+
+### g) Delete a song
+- Click the "Delete" button next to any song
+
+### h) Add new favorite song
+- Click "Add New Song" link and fill out the form
+
+### i) List songs by Singer from specified film
+- Use the "List songs by Singer and Film" form
+
+### j) Update document with Actor and Actress
+- Click "Update Actor/Actress" link and fill out the form
+
+### k) Display data in tabular format
+- Home page shows all data in a table with columns: Song Name, Film, Music Director, Singer, Actor, Actress
+
+## 5. Additional Notes
+
+- The application uses a simple HTML interface for demonstration
+- Sample data includes popular Bollywood songs for testing
+- All operations are performed through the browser interface
+- The application includes proper error handling and data validation
+- For production use, consider adding authentication and additional security measures
